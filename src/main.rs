@@ -1,10 +1,13 @@
+mod window;
+
 use opencv::{
-    highgui,
     prelude::*,
     videoio,
     core,
     Result,
 };
+
+use window::WebcamWindow;
 
 fn main() -> Result<()> {
     // Open the default camera (usually camera 0)
@@ -13,26 +16,24 @@ fn main() -> Result<()> {
         panic!("Unable to open default camera!");
     }
 
-    let window = "Webcam Feed";
-    highgui::named_window(window, highgui::WINDOW_NORMAL)?;
-    highgui::resize_window(window, 800, 600)?;
+    let window = WebcamWindow::new("Webcam Feed", 800, 600)?;
 
     loop {
         let mut frame = core::Mat::default();
         cam.read(&mut frame)?;
 
         if frame.size()?.width > 0 {
-            highgui::imshow(window, &frame)?;
+            window.show(&frame)?;
         }
 
         // Break loop if 'q' is pressed
-        let key = highgui::wait_key(10)?;
+        let key = window.wait_key(10)?;
         if key == 'q' as i32 {
             break;
         }
     }
 
-    highgui::destroy_window(window)?;
+    window.close()?;
 
     Ok(())
 }
